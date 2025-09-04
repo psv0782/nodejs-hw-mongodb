@@ -1,6 +1,7 @@
-import express from 'express';
+import express, {json} from 'express';
 import pino from 'pino-http';
 import cors from 'cors';
+import crypto from 'node:crypto';
 
 import {ENV_VARS} from "./constants/envVars.js";
 import {getEnvVar} from "./utils/getEnvVar.js";
@@ -23,9 +24,16 @@ export const setupServer = () => {
         cors(),
     ]);
 
+    app.use(
+        json({
+            type: ['application/json', 'application/vnd.api+json'],
+            limit: '100kb',
+        }),
+    );
+
     app.use(contactsRouter);
 
-    app.use('*', notFoundHandler);
+    app.use(notFoundHandler);
 
     app.use(errorHandler);
     //
