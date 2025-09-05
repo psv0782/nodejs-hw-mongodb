@@ -1,13 +1,13 @@
 import express, {json} from 'express';
 import pino from 'pino-http';
 import cors from 'cors';
-import crypto from 'node:crypto';
 import indexRouter from "./routers/index.js";
 
 import {ENV_VARS} from "./constants/envVars.js";
 import {getEnvVar} from "./utils/getEnvVar.js";
 import {notFoundHandler} from "./middlewares/notFoundHandler.js";
 import {errorHandler} from "./middlewares/errorHandler.js";
+import {requestIdMiddleware} from "./middlewares/requestIdMiddleware.js";
 
 const PORT = Number(getEnvVar(ENV_VARS.PORT, 3000));
 
@@ -15,14 +15,7 @@ export const setupServer = () => {
 
     const app = express();
 
-    app.use([
-        (req, res, next) => {
-            req.id = crypto.randomUUID();
-            next();
-        },
-        pino(),
-        cors(),
-    ]);
+    app.use([requestIdMiddleware, pino(), cors()]);
 
     app.use(
         json({
