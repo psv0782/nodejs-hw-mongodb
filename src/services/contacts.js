@@ -1,13 +1,13 @@
 import {Contacts} from "../db/models/contacts.js";
+import mongoose from "mongoose";
 
 export const getContacts = async () => {
-    const contacts = await Contacts.find();
-    return contacts;
+    return Contacts.find();
 };
 
 export const getContactById = async (contactId) => {
-    const contact = await Contacts.findById(contactId);
-    return contact;
+    if (!mongoose.isValidObjectId(contactId)) return null;
+    return Contacts.findById(contactId);
 };
 
 export const createContact = async (payload) => {
@@ -16,19 +16,21 @@ export const createContact = async (payload) => {
 };
 
 export const deleteContact = async (contactId) => {
-    const contact = await Contacts.findOneAndDelete({
+    if (!mongoose.isValidObjectId(contactId)) return null;
+    return Contacts.findOneAndDelete({
         _id: contactId,
     });
-    return contact;
 }
 
 export const updateContact = async (contactId, payload, options = {}) => {
+    if (!mongoose.isValidObjectId(contactId)) return null;
     const rawResult = await Contacts.findOneAndUpdate(
-        { _id: contactId },
+        {_id: contactId},
         payload,
         {
             new: true,
             includeResultMetadata: true,
+            runValidators: true,
             ...options,
         },
     );

@@ -2,10 +2,10 @@ import express, {json} from 'express';
 import pino from 'pino-http';
 import cors from 'cors';
 import crypto from 'node:crypto';
+import indexRouter from "./routers/index.js";
 
 import {ENV_VARS} from "./constants/envVars.js";
 import {getEnvVar} from "./utils/getEnvVar.js";
-import contactsRouter from "./routers/contacts.js";
 import {notFoundHandler} from "./middlewares/notFoundHandler.js";
 import {errorHandler} from "./middlewares/errorHandler.js";
 
@@ -31,18 +31,11 @@ export const setupServer = () => {
         }),
     );
 
-    app.use(contactsRouter);
+    app.use(indexRouter);
 
     app.use(notFoundHandler);
 
     app.use(errorHandler);
-    //
-    // app.use((req, res) => {
-    //     res.status(404).json({
-    //         message: 'Not found',
-    //         status: 404,
-    //     });
-    // });
 
     app.listen(PORT, () => {
         console.log(`Server is running on port ${PORT}`);
