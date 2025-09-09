@@ -8,14 +8,19 @@ import {
     upsertContactController
 } from "../controllers/contacts.js";
 import {ctrlWrapper} from "../utils/ctrlWrapper.js";
+import {validateBody} from "../middlewares/validateBody.js";
+import {createContactValidationSchema} from "../validation/createContactValidationSchema.js";
+import {updateContactValidationSchema} from "../validation/updateContactValidationSchema.js";
+import {isValidId} from "../middlewares/isValidId.js";
 
 const router = Router();
 
+// router.use('/:contactId', isValidId); ожно использовать такой вариант, что бы не писать isValidId в каждом руте где используется contactId
 router.get('/', ctrlWrapper(getContactsController));
-router.get('/:contactId', ctrlWrapper(getContactByIdController));
-router.post('/', ctrlWrapper(postCreateContactController));
-router.delete('/:contactId', ctrlWrapper(deleteContactController));
-router.put('/:contactId', ctrlWrapper(upsertContactController));
-router.patch('/:contactId', ctrlWrapper(patchContactController));
+router.get('/:contactId', isValidId, ctrlWrapper(getContactByIdController));
+router.post('/', validateBody(createContactValidationSchema), ctrlWrapper(postCreateContactController));
+router.delete('/:contactId', isValidId, ctrlWrapper(deleteContactController));
+router.put('/:contactId', isValidId, validateBody(createContactValidationSchema), ctrlWrapper(upsertContactController));
+router.patch('/:contactId', isValidId, validateBody(updateContactValidationSchema), ctrlWrapper(patchContactController));
 
 export default router;

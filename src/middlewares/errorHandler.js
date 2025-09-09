@@ -7,9 +7,20 @@ export const errorHandler = (err, req, res, next) => {
         res.status(err.status).json({
             status: err.status,
             message: err.name,
-            data: err,
+            error: err.message,
         });
         return;
+    }
+
+    if (err.isJoi) {
+        return res.status(400).json({
+            status: 400,
+            message: 'Bad Request',
+            errors: err.details.map((err) => ({
+                path: err.path,
+                message: err.message,
+            })),
+        });
     }
 
     if (err instanceof MongooseError) {
