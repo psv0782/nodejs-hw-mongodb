@@ -1,8 +1,10 @@
 export const validateBody = (schema) => async (req, res, next) => {
-        await schema.validateAsync(req.body, {
-            allowUnknown: false,
+        const {error, value} = schema.validate(req.body, {
             abortEarly: false,
-            convert: false,
+            stripUnknown: true,
+            convert: true,
         });
-        next();
+    if (error) return next(error);
+    req.body = value;
+    next();
 };

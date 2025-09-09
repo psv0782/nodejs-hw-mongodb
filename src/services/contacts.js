@@ -11,27 +11,36 @@ const createPaginationMetadata = (page, perPage, itemsCount) => {
         totalPages,
         hasPreviousPage: page > 1,
         hasNextPage: page < totalPages,
+
     };
 }
 
-export const getContacts = async ({page = 1, perPage = 10}) => {
+export const getContacts = async ({
+                                      page = 1,
+                                      perPage = 10,
+                                      sortBy = 'name',
+                                      sortOrder = 'asc',
+                                      filters = {},
+                                  }) => {
     page = Number.isFinite(+page) && +page > 0 ? +page : 1;
     perPage = Number.isFinite(+perPage) && +perPage > 0 ? +perPage : 10;
-
     const skip = (page - 1) * perPage;
 
-    const [contacts, totalItems] = await Promise.all([
-        Contacts.find().skip(skip).limit(perPage).lean(),
-        Contacts.find().countDocuments(),
+    const contactsConditions = Contacts.find();
+
+    if(filters.type){
+        contactsConditions.where('contactType').equals(filters.type);
+    }
+    if(typeof filters.isFavourite === 'boolean'){
+        contactsConditions.where('isFavourite').equals(filters.isFavourite);
+    }
+
+    const [data, totalItems] = await Promise.all([
+        Contacts.find().merge(contactsConditions).skip(skip).limit(perPage).lean().sort({[sortBy]: sortOrder}),
+        Contacts.find().merge(contactsConditions).countDocuments(),
     ]);
-
     const meta = createPaginationMetadata(page, perPage, totalItems);
-
-    // const contacts = Contacts.find().limit(perPage).skip(skip);
-    // const contactsCount = await Contacts.find().countDocuments();
-
-    // return {contacts, ...createPaginationMetadata(page, perPage, contactsCount)};
-    return {contacts, ...meta};
+    return {data, ...meta};
 };
 
 export const getContactById = async (contactId) => {

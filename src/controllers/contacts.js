@@ -1,11 +1,19 @@
 import {getContactById, getContacts, createContact, deleteContact, updateContact} from "../services/contacts.js";
 import createHttpError from "http-errors";
 
+const buildContactFilters = (query) => ({
+    type: query.type,
+    isFavourite: query.isFavourite,
+});
+
 export const getContactsController = async (req, res) => {
     const contactsPage = await getContacts(
         {
-            page: Number(req.query.page) || 1,
-            perPage: Number(req.query.perPage) || 10,
+            page: Number(req.validatedQuery.page) || 1,
+            perPage: Number(req.validatedQuery.perPage) || 10,
+            sortBy: req.validatedQuery.sortBy || 'name',
+            sortOrder: req.validatedQuery.sortOrder || 'asc',
+            filters: buildContactFilters(req.validatedQuery),
         }
     );
 
