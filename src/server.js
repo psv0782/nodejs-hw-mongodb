@@ -8,6 +8,7 @@ import {getEnvVar} from "./utils/getEnvVar.js";
 import {notFoundHandler} from "./middlewares/notFoundHandler.js";
 import {errorHandler} from "./middlewares/errorHandler.js";
 import {requestIdMiddleware} from "./middlewares/requestIdMiddleware.js";
+import cookieParser from 'cookie-parser';
 
 const PORT = Number(getEnvVar(ENV_VARS.PORT, 3000));
 
@@ -15,7 +16,7 @@ export const setupServer = () => {
 
     const app = express();
 
-    app.use([requestIdMiddleware, pino(), cors()]);
+    app.use([requestIdMiddleware, pino(), cors(), cookieParser()]);
 
     app.use(
         json({
