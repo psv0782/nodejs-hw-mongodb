@@ -14,10 +14,19 @@ import {updateContactValidationSchema} from "../validation/updateContactValidati
 import {isValidId} from "../middlewares/isValidId.js";
 import {validateQuery} from "../middlewares/validateQuery.js";
 import {getContactsQueryParamsValidationSchema} from "../validation/getContactsQueryParamsValidationSchema.js";
+import {authenticate} from "../middlewares/authenticate.js";
 
 const router = Router();
 
 // router.use('/:contactId', isValidId); ожно использовать такой вариант, что бы не писать isValidId в каждом руте где используется contactId
+router.use('/', authenticate);
+router.use(
+    '/:studentId',
+    validateParams('studentId'),
+    checkPermissionsToInteractWithStudent,
+);
+
+
 router.get('/',validateQuery(getContactsQueryParamsValidationSchema), ctrlWrapper(getContactsController));
 router.get('/:contactId', validateQuery(getContactsQueryParamsValidationSchema), isValidId, ctrlWrapper(getContactByIdController));
 router.post('/', validateBody(createContactValidationSchema), ctrlWrapper(postCreateContactController));
