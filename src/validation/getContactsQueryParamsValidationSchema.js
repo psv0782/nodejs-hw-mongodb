@@ -1,5 +1,4 @@
 import Joi from 'joi';
-import {CONTACT_TYPE} from "../constants/contactType.js";
 import {contactTypeValidation} from "./helpers.js";
 
 export const getContactsQueryParamsValidationSchema = Joi.object({

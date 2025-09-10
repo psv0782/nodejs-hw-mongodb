@@ -11,18 +11,18 @@ import {ctrlWrapper} from "../utils/ctrlWrapper.js";
 import {validateBody} from "../middlewares/validateBody.js";
 import {createContactValidationSchema} from "../validation/createContactValidationSchema.js";
 import {updateContactValidationSchema} from "../validation/updateContactValidationSchema.js";
-import {isValidId} from "../middlewares/isValidId.js";
+import {validateParams} from "../middlewares/isValidId.js";
 import {validateQuery} from "../middlewares/validateQuery.js";
 import {getContactsQueryParamsValidationSchema} from "../validation/getContactsQueryParamsValidationSchema.js";
 
 const router = Router();
 
-// router.use('/:contactId', isValidId); ожно использовать такой вариант, что бы не писать isValidId в каждом руте где используется contactId
+// router.use('/:contactId', validateParams('contactId')); можно использовать такой вариант, что бы не писать validateParams в каждом руте где используется contactId
 router.get('/',validateQuery(getContactsQueryParamsValidationSchema), ctrlWrapper(getContactsController));
-router.get('/:contactId', validateQuery(getContactsQueryParamsValidationSchema), isValidId, ctrlWrapper(getContactByIdController));
+router.get('/:contactId', validateQuery(getContactsQueryParamsValidationSchema), validateParams('contactId'), ctrlWrapper(getContactByIdController));
 router.post('/', validateBody(createContactValidationSchema), ctrlWrapper(postCreateContactController));
-router.delete('/:contactId', isValidId, ctrlWrapper(deleteContactController));
-router.put('/:contactId', isValidId, validateBody(createContactValidationSchema), ctrlWrapper(upsertContactController));
-router.patch('/:contactId', isValidId, validateBody(updateContactValidationSchema), ctrlWrapper(patchContactController));
+router.delete('/:contactId', validateParams('contactId'), ctrlWrapper(deleteContactController));
+router.put('/:contactId', validateParams('contactId'), validateBody(createContactValidationSchema), ctrlWrapper(upsertContactController));
+router.patch('/:contactId', validateParams('contactId'), validateBody(updateContactValidationSchema), ctrlWrapper(patchContactController));
 
 export default router;
