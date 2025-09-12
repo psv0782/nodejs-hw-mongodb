@@ -1,5 +1,13 @@
-import {getContactById, getContacts, createContact, deleteContact, updateContact} from "../services/contacts.js";
+import {
+    getContactById,
+    getContacts,
+    createContact,
+    deleteContact,
+    updateContact,
+    upsertContact
+} from "../services/contacts.js";
 import createHttpError from "http-errors";
+import {USER_ROLES} from "../constants/roles.js";
 
 const buildContactFilters = (query) => ({
     type: query.type,
@@ -7,14 +15,28 @@ const buildContactFilters = (query) => ({
 });
 
 export const getContactsController = async (req, res) => {
+
+    if (!req.user?._id) {
+        // подстраховка, если authenticate не поставил user
+        throw createHttpError(401, 'Unauthorized');
+    }
+
+    const filters = buildContactFilters(req.validatedQuery);
+
+
+    if (req.user.role === USER_ROLES.OWNER) {
+        filters.userId = req.user._id;
+    }
+
     const contactsPage = await getContacts(
         {
             page: Number(req.validatedQuery.page) || 1,
             perPage: Number(req.validatedQuery.perPage) || 10,
             sortBy: req.validatedQuery.sortBy || 'name',
             sortOrder: req.validatedQuery.sortOrder || 'asc',
-            filters: buildContactFilters(req.validatedQuery),
-        }
+            filters,
+        },
+        // req.user._id,
     );
 
     res.json({
@@ -40,7 +62,10 @@ export const getContactByIdController = async (req, res) => {
 }
 
 export const postCreateContactController = async (req, res) => {
-    const contact = await createContact(req.body);
+    const contact = await createContact({
+        ...req.body,
+        userId: req.body.userId ?? req.user._id
+    });
 
     res.status(201).json({
         status: 201,
@@ -61,20 +86,18 @@ export const deleteContactController = async (req, res) => {
 
 export const upsertContactController = async (req, res) => {
     const {contactId} = req.params;
-    const result = await updateContact(contactId, req.body, {
-        upsert: true,
+
+    const {isNew, contact} = await upsertContact(contactId, {
+        ...req.body,
+        userId: req.body.userId ?? req.user._id
     });
 
-    if (!result) {
-        throw createHttpError(404, `${contactId} contact not found`);
-    }
-
-    const status = result.isNew ? 201 : 200;
+    const status = isNew ? 201 : 200;
 
     res.status(status).json({
         status,
-        message: `Successfully upserted a ${contactId} contact!`,
-        data: result.contact,
+        message: `Successfully upserted a contact!`,
+        data: contact,
     });
 }
 

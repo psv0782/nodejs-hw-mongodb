@@ -13,7 +13,7 @@ const createSession = (userId) => ({
 });
 
 export const registerUser = async (payload) => {
-    const existingUser = await User.findOne({ email: payload.email });
+    const existingUser = await User.findOne({email: payload.email});
     if (existingUser) {
         throw createHttpError(409, 'User with this email already registered!');
     }
@@ -28,8 +28,8 @@ export const registerUser = async (payload) => {
     return user;
 };
 
-export const loginUser = async ({ email, password }) => {
-    const user = await User.findOne({ email });
+export const loginUser = async ({email, password}) => {
+    const user = await User.findOne({email});
 
     if (!user) {
         throw createHttpError(404, 'User with given credentials does not exist!');
@@ -41,7 +41,7 @@ export const loginUser = async ({ email, password }) => {
         throw createHttpError(404, 'User with given credentials does not exist!');
     }
 
-    await Session.deleteOne({ userId: user._id });
+    await Session.deleteOne({userId: user._id});
 
     const session = await Session.create(createSession(user._id));
 
@@ -72,6 +72,7 @@ export const refreshSession = async (sessionId, refreshToken) => {
     }
 
     await Session.findByIdAndDelete(sessionId);
+
     const newSession = await Session.create(createSession(user._id));
 
     return newSession;

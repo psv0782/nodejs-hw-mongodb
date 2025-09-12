@@ -3,6 +3,12 @@ import {User} from "./user.js";
 
 const sessionSchema = new Schema(
     {
+        userId: {
+            type: Types.ObjectId,
+            ref: User,
+            required: true,
+            unique: true,
+        },
         accessToken: {
             type: String,
             required: true,
@@ -18,12 +24,6 @@ const sessionSchema = new Schema(
         refreshTokenValidUntil: {
             type: Date,
             required: true,
-        },
-        userId: {
-            type: Types.ObjectId,
-            ref: User,
-            required: true,
-            unique: true,
         },
     },
     {

@@ -1,4 +1,4 @@
 export const USER_ROLES = {
-    PARENT: 'parent',
-    TEACHER: 'teacher',
+    OWNER: 'owner',
+    WATCHER: 'watcher',
 };

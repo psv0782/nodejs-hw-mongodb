@@ -1,5 +1,6 @@
-import {model, Schema} from 'mongoose';
+import {model, Schema, Types} from 'mongoose';
 import {CONTACT_TYPE} from "../../constants/contactType.js";
+import {User} from "./user.js";
 
 const contactSchema = new Schema({
         name: {
@@ -22,7 +23,12 @@ const contactSchema = new Schema({
             enum: Object.values(CONTACT_TYPE),
             required: true,
             default: 'personal',
-        }
+        },
+        userId: {
+            type: Schema.Types.ObjectId,
+            ref: User,
+            // required: true,
+        },
     },
     {
         timestamps: true,

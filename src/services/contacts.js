@@ -11,7 +11,6 @@ const createPaginationMetadata = (page, perPage, itemsCount) => {
         totalPages,
         hasPreviousPage: page > 1,
         hasNextPage: page < totalPages,
-
     };
 }
 
@@ -28,11 +27,14 @@ export const getContacts = async ({
 
     const contactsConditions = Contacts.find();
 
-    if(filters.type){
+    if (filters.type) {
         contactsConditions.where('contactType').equals(filters.type);
     }
-    if(typeof filters.isFavourite === 'boolean'){
+    if (typeof filters.isFavourite === 'boolean') {
         contactsConditions.where('isFavourite').equals(filters.isFavourite);
+    }
+    if (filters.userId) {
+        contactsConditions.where('userId').equals(filters.userId);
     }
 
     const [data, totalItems] = await Promise.all([
@@ -79,4 +81,24 @@ export const updateContact = async (contactId, payload, options = {}) => {
         contact: rawResult.value,
         isNew: Boolean(rawResult?.lastErrorObject?.upserted),
     };
+};
+
+
+export const upsertContact = async (contactId, payload) => {
+    const contact = await getContactById(contactId);
+    if (!contact) {
+        const contact = await Contacts.create({_id: contactId, ...payload});
+
+        return {
+            isNew: true,
+            contact,
+        };
+    } else {
+        const contact = await updateContact(contactId, payload);
+
+        return {
+            isNew: false,
+            contact,
+        };
+    }
 };

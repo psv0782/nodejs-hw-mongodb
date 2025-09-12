@@ -13,21 +13,21 @@ import {ctrlWrapper} from "../utils/ctrlWrapper.js";
 const authRouter = Router();
 
 authRouter.post(
-    '/auth/register',
+    '/register',
     validateBody(registerUserValidationSchema),
     ctrlWrapper(registerUserController),
 );
 authRouter.post(
-    '/auth/login',
+    '/login',
     validateBody(loginUserValidationSchema),
     ctrlWrapper(loginUserController),
 );
 authRouter.post(
-    '/auth/logout',
+    '/logout',
     ctrlWrapper(logoutUserController)
 );
 authRouter.post(
-    '/auth/refresh-session',
+    '/refresh-session',
     ctrlWrapper(refreshSessionController)
 );
 
