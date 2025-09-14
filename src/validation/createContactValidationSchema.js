@@ -1,5 +1,11 @@
 import Joi from 'joi';
-import {contactTypeValidation, emailValidation, nameValidation, phoneNumberValidation} from "./helpers.js";
+import {
+    contactTypeValidation,
+    emailValidation,
+    nameValidation,
+    objectIdValidation,
+    phoneNumberValidation
+} from "./helpers.js";
 import {CONTACT_TYPE} from "../constants/contactType.js";
 
 export const createContactValidationSchema = Joi.object({
@@ -21,4 +27,5 @@ export const createContactValidationSchema = Joi.object({
     contactType: contactTypeValidation().default(CONTACT_TYPE.PERSONAL).required().messages({
         'any.required': "It's required",
     }),
+    userId: objectIdValidation()
 });

@@ -1,5 +1,5 @@
 import createHttpError from 'http-errors';
-import { isValidObjectId } from 'mongoose';
+import {isValidObjectId} from 'mongoose';
 
 export const validateParams =
     (id = 'id') =>
