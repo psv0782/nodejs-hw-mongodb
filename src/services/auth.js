@@ -5,7 +5,7 @@ import {Session} from "../db/models/session.js";
 import bcrypt from "bcrypt";
 import {ENV_VARS} from "../constants/envVars.js";
 import {getEnvVar} from "../utils/getEnvVar.js";
-import {sendEmail} from "../utils/sendEmail.js";
+import {sendMail} from "../utils/sendMail.js";
 import jwt from "jsonwebtoken";
 import Handlebars from "handlebars";
 import fs from "node:fs";
@@ -92,38 +92,45 @@ export const refreshSession = async (sessionId, refreshToken) => {
 }
 
 export const sendResetPasswordEmail = async (email) => {
-    const user = await User.findOne({ email });
+    try {
+        const user = await User.findOne({email});
 
-    if (!user) {
-        throw createHttpError(404, 'User not found!');
+        if (!user) {
+            throw createHttpError(404, 'User not found!');
+        }
+
+        const host = getEnvVar(ENV_VARS.FRONTEND_DOMAIN);
+        const token = jwt.sign(
+            {
+                sub: user._id,
+                email: user.email
+            },
+            getEnvVar(ENV_VARS.JWT_SECRET),
+            {
+                expiresIn: '5m',
+            },
+        );
+
+        const resetPasswordLink = `${host}/reset-password?token=${token}`;
+
+        const template = Handlebars.compile(resetPasswordTemplate);
+
+        const html = template({
+            name: user.name,
+            link: resetPasswordLink,
+        });
+
+        await sendMail({
+            to: email,
+            subject: 'Reset your password!',
+            html
+        });
+    } catch {
+        throw createHttpError(
+            500,
+            'Failed to send the email, please try again later.',
+        );
     }
-
-    const host = getEnvVar(ENV_VARS.FRONTEND_DOMAIN);
-    const token = jwt.sign(
-        {
-            sub: user._id,
-            email: user.email
-        },
-        getEnvVar(ENV_VARS.JWT_SECRET),
-        {
-            expiresIn: '5m',
-        },
-    );
-
-    const resetPasswordLink = `${host}/reset-password?token=${token}`;
-
-    const template = Handlebars.compile(resetPasswordTemplate);
-
-    const html = template({
-        name: user.name,
-        link: resetPasswordLink,
-    });
-
-    await sendEmail({
-        to: email,
-        subject: 'Reset your password!',
-        html
-    });
 };
 
 export const resetPassword = async (token, password) => {
@@ -133,7 +140,7 @@ export const resetPassword = async (token, password) => {
         payload = jwt.verify(token, getEnvVar(ENV_VARS.JWT_SECRET));
     } catch (err) {
         console.error(err);
-        throw createHttpError(401, err.message);
+        throw createHttpError(401, 'Token is expired or invalid.');
     }
 
     const user = await User.findById(payload.sub);
@@ -145,4 +152,6 @@ export const resetPassword = async (token, password) => {
     user.password = await bcrypt.hash(password, 10);
 
     await user.save();
+
+    await logoutUser(user.sessionId);
 };

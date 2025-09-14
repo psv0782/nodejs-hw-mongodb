@@ -34,13 +34,13 @@ authRouter.post(
 );
 
 authRouter.post(
-    '/send-reset-password-email',
+    '/send-reset-email',
     validateBody(sendResetPasswordValidationSchema),
     ctrlWrapper(sendResetPasswordEmailController)
 );
 
 authRouter.post(
-    '/reset-password',
+    '/reset-pwd',
     validateBody(resetPasswordValidationSchema),
     ctrlWrapper(resetPasswordController)
 );

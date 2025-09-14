@@ -6,16 +6,14 @@ import {ENV_VARS} from "../constants/envVars.js";
 const transport = nodemailer.createTransport({
     port: getEnvVar(ENV_VARS.SMTP_PORT),
     host: getEnvVar(ENV_VARS.SMTP_HOST),
-    secure: true,
+    secure: false,
     auth: {
         user: getEnvVar(ENV_VARS.SMTP_USER),
         pass: getEnvVar(ENV_VARS.SMTP_PASSWORD),
     },
 });
 
-await transport.verify();
-
-export const sendEmail = async ({ to, subject, html }) => {
+export const sendMail = async ({ to, subject, html }) => {
     try {
         await transport.sendMail({
             subject,
