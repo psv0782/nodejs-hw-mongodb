@@ -3,6 +3,19 @@ import createHttpError from "http-errors";
 import {User} from "../db/models/user.js";
 import {Session} from "../db/models/session.js";
 import bcrypt from "bcrypt";
+import {ENV_VARS} from "../constants/envVars.js";
+import {getEnvVar} from "../utils/getEnvVar.js";
+import {sendEmail} from "../utils/sendEmail.js";
+import jwt from "jsonwebtoken";
+import Handlebars from "handlebars";
+import fs from "node:fs";
+import path from "node:path";
+import {TEMPLATE_DIR_PATH} from "../constants/path.js";
+
+const resetPasswordTemplate = fs
+    .readFileSync(path.join(TEMPLATE_DIR_PATH, 'send-reset-email-password.html'))
+    .toString();
+
 
 const createSession = (userId) => ({
     accessToken: crypto.randomBytes(30).toString('base64'),
@@ -77,3 +90,59 @@ export const refreshSession = async (sessionId, refreshToken) => {
 
     return newSession;
 }
+
+export const sendResetPasswordEmail = async (email) => {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+        throw createHttpError(404, 'User not found!');
+    }
+
+    const host = getEnvVar(ENV_VARS.FRONTEND_DOMAIN);
+    const token = jwt.sign(
+        {
+            sub: user._id,
+            email: user.email
+        },
+        getEnvVar(ENV_VARS.JWT_SECRET),
+        {
+            expiresIn: '5m',
+        },
+    );
+
+    const resetPasswordLink = `${host}/reset-password?token=${token}`;
+
+    const template = Handlebars.compile(resetPasswordTemplate);
+
+    const html = template({
+        name: user.name,
+        link: resetPasswordLink,
+    });
+
+    await sendEmail({
+        to: email,
+        subject: 'Reset your password!',
+        html
+    });
+};
+
+export const resetPassword = async (token, password) => {
+    let payload;
+
+    try {
+        payload = jwt.verify(token, getEnvVar(ENV_VARS.JWT_SECRET));
+    } catch (err) {
+        console.error(err);
+        throw createHttpError(401, err.message);
+    }
+
+    const user = await User.findById(payload.sub);
+
+    if (!user) {
+        throw createHttpError(404, 'User not found!');
+    }
+
+    user.password = await bcrypt.hash(password, 10);
+
+    await user.save();
+};
