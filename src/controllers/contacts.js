@@ -4,7 +4,7 @@ import {
     createContact,
     deleteContact,
     updateContact,
-    upsertContact
+    upsertContact, uploadContactsPhoto
 } from "../services/contacts.js";
 import createHttpError from "http-errors";
 import {USER_ROLES} from "../constants/roles.js";
@@ -73,33 +73,6 @@ export const postCreateContactController = async (req, res) => {
     });
 }
 
-export const deleteContactController = async (req, res) => {
-    const {contactId} = req.params;
-    const contact = await deleteContact(contactId, req.user._id);
-
-    if (!contact) {
-        throw createHttpError(404, `${contactId} contact not found`);
-    }
-    res.status(204).end();
-}
-
-export const upsertContactController = async (req, res) => {
-    const {contactId} = req.params;
-
-    const {isNew, contact} = await upsertContact(contactId, {
-        ...req.body,
-        userId: req.user._id},
-        req.user._id,);
-
-    const status = isNew ? 201 : 200;
-
-    res.status(status).json({
-        status,
-        message: `Successfully upserted a contact!`,
-        data: contact,
-    });
-}
-
 export const patchContactController = async (req, res) => {
     const {contactId} = req.params;
     const result = await updateContact(contactId, req.body, req.user._id);
@@ -112,4 +85,45 @@ export const patchContactController = async (req, res) => {
         message: `Successfully patched a ${contactId} contact!`,
         data: result.contact
     });
+}
+
+export const upsertContactController = async (req, res) => {
+    const {contactId} = req.params;
+
+    const {isNew, contact} = await upsertContact(contactId, {
+            ...req.body,
+            userId: req.user._id},
+        req.user._id,);
+
+    const status = isNew ? 201 : 200;
+
+    res.status(status).json({
+        status,
+        message: `Successfully upserted a contact!`,
+        data: contact,
+    });
+}
+
+export const uploadContactsPhotoController = async (req, res) => {
+    const {contactId} = req.params;
+
+    console.log('--- uploadContactsPhotoController req.file:', req.file);
+
+
+    const contact = await uploadContactsPhoto(contactId, req.file, req.user._id);
+    res.send({
+        status: 200,
+        message: 'Successfully uploaded a photo for a contact!',
+        data: contact,
+    });
+};
+
+export const deleteContactController = async (req, res) => {
+    const {contactId} = req.params;
+    const contact = await deleteContact(contactId, req.user._id);
+
+    if (!contact) {
+        throw createHttpError(404, `${contactId} contact not found`);
+    }
+    res.status(204).end();
 }

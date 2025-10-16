@@ -4,7 +4,9 @@ import {
     loginUserController,
     logoutUserController,
     refreshSessionController,
-    registerUserController, resetPasswordController, sendResetPasswordEmailController
+    registerUserController,
+    resetPasswordController,
+    sendResetPasswordEmailController
 } from "../controllers/auth.js";
 import {registerUserValidationSchema} from "../validation/registerUserValidationSchema.js";
 import {loginUserValidationSchema} from "../validation/loginUserValidationSchema.js";
@@ -35,7 +37,7 @@ authRouter.post(
 
 authRouter.post(
     '/send-reset-email',
-    validateBody(sendResetPasswordValidationSchema),
+    // validateBody(sendResetPasswordValidationSchema),
     ctrlWrapper(sendResetPasswordEmailController)
 );
 

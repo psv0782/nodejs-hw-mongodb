@@ -1,5 +1,7 @@
 import {Contacts} from "../db/models/contacts.js";
 import mongoose from "mongoose";
+import createHttpError from "http-errors";
+import {saveFile} from "../utils/saveFile.js";
 
 const createPaginationMetadata = (page, perPage, itemsCount) => {
     const totalPages = Math.max(1, Math.ceil(itemsCount / perPage));
@@ -56,6 +58,21 @@ export const createContact = async (payload) => {
     return contact;
 };
 
+export const uploadContactsPhoto = async (contactId, file, userId) => {
+    const contact = await getContactById(contactId, userId);
+    if (!contact) {
+        throw createHttpError(404, 'Contact not found!');
+    }
+
+    const filePath = await saveFile(file);
+
+    contact.photo = filePath;
+
+    await contact.save();
+
+    return contact;
+};
+
 export const deleteContact = async (contactId, userId) => {
     if (!mongoose.isValidObjectId(contactId)) return null;
     return Contacts.findOneAndDelete({
@@ -84,21 +101,41 @@ export const updateContact = async (contactId, payload, userId, options = {}) =>
 };
 
 
-export const upsertContact = async (contactId, userId, payload) => {
-    const contact = await getContactById(contactId);
-    if (!contact) {
-        const contact = await Contacts.create({_id: contactId, ...payload});
+// export const upsertContact = async (contactId, payload, userId) => {
+//     const contact = await getContactById(contactId);
+//     if (!contact) {
+//         const contact = await Contacts.create({_id: contactId, ...payload});
+//
+//         return {
+//             isNew: true,
+//             contact,
+//         };
+//     } else {
+//         const contact = await updateContact(contactId, userId, payload);
+//
+//         return {
+//             isNew: false,
+//             contact,
+//         };
+//     }
+// };
 
-        return {
-            isNew: true,
-            contact,
-        };
-    } else {
-        const contact = await updateContact(contactId, userId, payload);
+// ✅ исправленный upsert (тоже с userId)
+export const upsertContact = async (contactId, payload, userId) => {
+    if (!mongoose.isValidObjectId(contactId)) return null;
 
-        return {
-            isNew: false,
-            contact,
-        };
+    const existing = await Contacts.findOne({ _id: contactId, userId });
+
+    if (!existing) {
+        const newContact = await Contacts.create({ _id: contactId, ...payload, userId });
+        return { isNew: true, contact: newContact };
     }
+
+    const updated = await Contacts.findOneAndUpdate(
+        { _id: contactId, userId },
+        payload,
+        { new: true, runValidators: true }
+    );
+
+    return { isNew: false, contact: updated};
 };
