@@ -8,6 +8,9 @@ import {
 } from "../services/contacts.js";
 import createHttpError from "http-errors";
 import {USER_ROLES} from "../constants/roles.js";
+import {getEnvVar} from "../utils/getEnvVar.js";
+import {saveFileToCloudinary} from "../utils/saveFileToCloudinary.js";
+import {saveFileToLocal} from "../utils/saveFileToLocal.js";
 
 const buildContactFilters = (query) => ({
     type: query.type,
@@ -75,7 +78,17 @@ export const postCreateContactController = async (req, res) => {
 
 export const patchContactController = async (req, res) => {
     const {contactId} = req.params;
-    const result = await updateContact(contactId, req.body, req.user._id);
+    const photo = req.file;
+    let photoUrl;
+
+    if (photo) {
+        if (getEnvVar('ENABLE_CLOUDINARY') === 'true') {
+            photoUrl = await saveFileToCloudinary(photo);
+        } else {
+            photoUrl = await saveFileToLocal(photo);
+        }
+    }
+    const result = await updateContact(contactId, {...req.body, photo: photoUrl}, req.user._id);
 
     if (!result) {
         throw createHttpError(404, `${contactId} contact not found`);
@@ -105,12 +118,8 @@ export const upsertContactController = async (req, res) => {
 }
 
 export const uploadContactsPhotoController = async (req, res) => {
-    const {contactId} = req.params;
 
-    console.log('--- uploadContactsPhotoController req.file:', req.file);
-
-
-    const contact = await uploadContactsPhoto(contactId, req.file, req.user._id);
+    const contact = await uploadContactsPhoto(req.params.contactId, req.file, req.user._id);
     res.send({
         status: 200,
         message: 'Successfully uploaded a photo for a contact!',

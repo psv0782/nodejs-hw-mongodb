@@ -23,7 +23,7 @@ export const sendMail = async ({ to, subject, html }) => {
         });
     } catch (err) {
         console.log(err);
-        throw createHttpError(500, 'Failed to sent email');
+        throw createHttpError(500, 'Failed to send the email, please try again later.');
     }
 };
 

@@ -29,7 +29,7 @@ router.get('/:contactId', validateQuery(getContactsQueryParamsValidationSchema),
 router.post('/', upload.single('photo'), validateBody(createContactValidationSchema), ctrlWrapper(postCreateContactController));
 router.patch('/:contactId', upload.single('photo'), validateParams('contactId'), validateBody(updateContactValidationSchema), ctrlWrapper(patchContactController));
 router.put('/:contactId', validateParams('contactId'), validateBody(createContactValidationSchema), ctrlWrapper(upsertContactController));
-router.put('/:contactId/photo', upload.single('photo'),  ctrlWrapper(uploadContactsPhotoController) );
+router.put('/:contactId/photo', upload.single('photo'),  ctrlWrapper(uploadContactsPhotoController));
 router.delete('/:contactId', validateParams('contactId'), ctrlWrapper(deleteContactController));
 
 export default router;
