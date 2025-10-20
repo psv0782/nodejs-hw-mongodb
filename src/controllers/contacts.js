@@ -63,10 +63,22 @@ export const getContactByIdController = async (req, res) => {
     });
 }
 
-export const postCreateContactController = async (req, res) => {
+export const createContactController = async (req, res) => {
+    const photo = req.file;
+    let photoUrl;
+
+    if (photo) {
+        if (getEnvVar('FILE_STORAGE_STRATEGY') === 'cloudinary') {
+            photoUrl = await saveFileToCloudinary(photo);
+        } else {
+            photoUrl = await saveFileToLocal(photo);
+        }
+    }
+
     const contact = await createContact({
         ...req.body,
-        userId: req.user._id
+        userId: req.user._id,
+        photo: photoUrl
     });
 
     res.status(201).json({
@@ -76,13 +88,13 @@ export const postCreateContactController = async (req, res) => {
     });
 }
 
-export const patchContactController = async (req, res) => {
+export const updateContactController = async (req, res) => {
     const {contactId} = req.params;
     const photo = req.file;
     let photoUrl;
 
     if (photo) {
-        if (getEnvVar('ENABLE_CLOUDINARY') === 'true') {
+        if (getEnvVar('FILE_STORAGE_STRATEGY') === 'cloudinary') {
             photoUrl = await saveFileToCloudinary(photo);
         } else {
             photoUrl = await saveFileToLocal(photo);

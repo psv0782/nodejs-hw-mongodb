@@ -3,8 +3,8 @@ import {
     deleteContactController,
     getContactByIdController,
     getContactsController,
-    patchContactController,
-    postCreateContactController, uploadContactsPhotoController,
+    updateContactController,
+    createContactController, uploadContactsPhotoController,
     upsertContactController
 } from "../controllers/contacts.js";
 import {ctrlWrapper} from "../utils/ctrlWrapper.js";
@@ -26,8 +26,8 @@ router.use('/:contactId', validateParams('contactId'), checkPermissionsToInterac
 // router.use('/:contactId', validateParams('contactId')); можно использовать такой вариант, что бы не писать validateParams в каждом руте где используется contactId
 router.get('/', validateQuery(getContactsQueryParamsValidationSchema), ctrlWrapper(getContactsController));
 router.get('/:contactId', validateQuery(getContactsQueryParamsValidationSchema), validateParams('contactId'), ctrlWrapper(getContactByIdController));
-router.post('/', upload.single('photo'), validateBody(createContactValidationSchema), ctrlWrapper(postCreateContactController));
-router.patch('/:contactId', upload.single('photo'), validateParams('contactId'), validateBody(updateContactValidationSchema), ctrlWrapper(patchContactController));
+router.post('/', upload.single('photo'), validateBody(createContactValidationSchema), ctrlWrapper(createContactController));
+router.patch('/:contactId', upload.single('photo'), validateParams('contactId'), validateBody(updateContactValidationSchema), ctrlWrapper(updateContactController));
 router.put('/:contactId', validateParams('contactId'), validateBody(createContactValidationSchema), ctrlWrapper(upsertContactController));
 router.put('/:contactId/photo', upload.single('photo'),  ctrlWrapper(uploadContactsPhotoController));
 router.delete('/:contactId', validateParams('contactId'), ctrlWrapper(deleteContactController));

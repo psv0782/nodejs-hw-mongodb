@@ -27,5 +27,6 @@ export const createContactValidationSchema = Joi.object({
     contactType: contactTypeValidation().default(CONTACT_TYPE.PERSONAL).required().messages({
         'any.required': "It's required",
     }),
-    userId: objectIdValidation()
+    userId: objectIdValidation(),
+    photo: Joi.string().uri().allow('', null)
 });
