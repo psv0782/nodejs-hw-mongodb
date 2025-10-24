@@ -11,6 +11,7 @@ import Handlebars from "handlebars";
 import fs from "node:fs";
 import path from "node:path";
 import {TEMPLATE_DIR_PATH} from "../constants/path.js";
+import {getFullNameFromGoogleTokenPayload, validateCode} from "../utils/googleOAuth2.js";
 
 const resetPasswordTemplate = fs
     .readFileSync(path.join(TEMPLATE_DIR_PATH, 'send-reset-email-password.html'))
@@ -154,4 +155,28 @@ export const resetPassword = async (token, password) => {
     await user.save();
 
     await logoutUser(user.sessionId);
+};
+
+export const loginOrSignupWithGoogle = async (code) => {
+    const loginTicket = await validateCode(code);
+    const payload = loginTicket.getPayload();
+    if (!payload) throw createHttpError(401);
+
+    let user = await UsersCollection.findOne({ email: payload.email });
+    if (!user) {
+        const password = await bcrypt.hash(randomBytes(10), 10);
+        user = await UsersCollection.create({
+            email: payload.email,
+            name: getFullNameFromGoogleTokenPayload(payload),
+            password,
+            role: 'parent',
+        });
+    }
+
+    const newSession = createSession();
+
+    return await SessionsCollection.create({
+        userId: user._id,
+        ...newSession,
+    });
 };

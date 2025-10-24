@@ -1,0 +1,97 @@
+tags:
+  - Contacts
+summary: Partial update of a contact with photo
+operationId: updateContact
+description: Updates specific fields of a contact by its unique identifier
+security:
+  - bearerAuth: []
+parameters:
+  - name: contactId
+    in: path
+    required: true
+    description: Unique identifier of the contact
+    schema:
+      type: string
+      example: 65ca67e7ae7f10c88b598384
+requestBody:
+  description: Partial update of a contact with photo
+  required: true
+  content:
+    multipart/form-data:
+      schema:
+        type: object
+        properties:
+          name:
+            type: string
+            description: Contact name
+          phoneNumber:
+            type: string
+            description: Contact phone number
+          email:
+            type:
+              - string
+              - 'null'
+            format: email
+            description: Contact email
+          isFavourite:
+            type: boolean
+            description: Is contact favourite
+          contactType:
+            type: string
+            enum: [work, home, personal]
+            description: Contact type
+          photo:
+            type:
+              - string
+              - 'null'
+            format: binary
+            description: Contact photo
+      encoding:
+        photo:
+          contentType: image/jpeg, image/png
+responses:
+  '200':
+    description: Contact successfully updated
+    content:
+      application/json:
+        schema:
+          $ref: ../../../components/schemas/contact.yaml
+  '404':
+    description: Contact with the specified ID not found
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            status:
+              type: integer
+              example: 404
+            message:
+              type: string
+              example: Contact not found
+  '400':
+    description: Invalid request (e.g., incorrect data)
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            status:
+              type: integer
+              example: 400
+            message:
+              type: string
+              example: Invalid contact data
+  '500':
+    description: Internal server error
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            status:
+              type: integer
+              example: 500
+            message:
+              type: string
+              example: Internal server error

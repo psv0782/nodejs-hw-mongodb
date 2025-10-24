@@ -1,0 +1,35 @@
+openapi: 3.1.0
+info:
+  version: 1.0.0
+  title: Contactі app
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  description: This is a documentation of contacts app
+
+servers:
+  - url: http://localhost:3000
+  - url: https://contacts-app-tvr8.onrender.com
+
+security:
+  - bearerAuth: []
+
+paths:
+  /contacts:
+    get:
+      $ref: ./paths/contacts/get.yaml
+    post:
+      $ref: ./paths/contacts/post.yaml
+  /contacts/{contactId}:
+    delete:
+      $ref: ./paths/contacts/{contactId}/delete.yaml
+    patch:
+      $ref: ./paths/contacts/{contactId}/patch.yaml
+    get:
+      $ref: ./paths/contacts/{contactId}/get.yaml
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer

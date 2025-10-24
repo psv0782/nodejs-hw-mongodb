@@ -11,6 +11,7 @@ import {errorHandler} from "./middlewares/errorHandler.js";
 import {requestIdMiddleware} from "./middlewares/requestIdMiddleware.js";
 import cookieParser from 'cookie-parser';
 import {UPLOAD_FILES_DIR_PATH} from "./constants/path.js";
+import {swaggerDocs} from "./middlewares/swaggerDocs.js";
 
 const PORT = Number(getEnvVar(ENV_VARS.PORT, 3000));
 
@@ -28,6 +29,7 @@ export const setupServer = () => {
     );
 
     app.use('/uploads', express.static(UPLOAD_FILES_DIR_PATH));
+    app.use('/api-docs', swaggerDocs());
 
     app.use(indexRouter);
 
