@@ -8,5 +8,6 @@ export const updateContactValidationSchema = Joi.object({
     email: emailValidation(),
     isFavourite: Joi.bool().default(false),
     contactType: Joi.string().valid(...Object.values(CONTACT_TYPE)),
-    userId: objectIdValidation()
+    userId: objectIdValidation(),
+    photo: Joi.string().uri().allow('', null)
 });

@@ -1,0 +1,108 @@
+tags:
+  - Contacts
+summary: Get list contacts
+operationId: getContacts
+description: Get list of users with this endpoint
+security:
+  - bearerAuth: []
+parameters:
+  - in: query
+    name: page
+    schema:
+      type: integer
+    example: 1
+  - in: query
+    name: perPage
+    schema:
+      type: integer
+    example: 10
+  - in: query
+    name: sortBy
+    schema:
+      type: string
+    example: name
+    description: All contacts fields can be mentioned. Default value - _id
+  - in: query
+    name: sortOrder
+    schema:
+      type: string
+      enum: [asc, desc]
+    example: asc
+
+responses:
+  '200':
+    description: Successfully found contact!
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - status
+            - message
+            - data
+          properties:
+            status:
+              type: integer
+              example: 200
+            message:
+              type: string
+              example: Successfully found contact!
+            data:
+              type: object
+              required:
+                - data
+                - page
+                - perPage
+                - totalItems
+                - totalPages
+                - hasNextPage
+                - hasPreviousPage
+              properties:
+                data:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                        example: 66dea8b0de4be41c36276e7b
+                      name:
+                        type: string
+                        example: tty11
+                      phoneNumber:
+                        type: string
+                        example: '80231231212'
+                      isFavourite:
+                        type: boolean
+                        example: false
+                      contactType:
+                        type: string
+                        example: home
+                      createdAt:
+                        type: string
+                        format: date-time
+                        example: '2024-09-09T07:50:08.376Z'
+                      updatedAt:
+                        type: string
+                        format: date-time
+                        example: '2024-09-09T07:50:08.376Z'
+                page:
+                  type: number
+                  example: 2
+                perPage:
+                  type: number
+                  example: 4
+                totalItems:
+                  type: number
+                  example: 4
+                totalPages:
+                  type: number
+                  example: 4
+                hasNextPage:
+                  type: boolean
+                  example: false
+                hasPreviousPage:
+                  type: boolean
+                  example: true
+  '401':
+    $ref: ../../components/responses/401.yaml

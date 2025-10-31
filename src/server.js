@@ -2,6 +2,7 @@ import express, {json} from 'express';
 import pino from 'pino-http';
 import cors from 'cors';
 import indexRouter from "./routers/index.js";
+import 'dotenv/config';
 
 import {ENV_VARS} from "./constants/envVars.js";
 import {getEnvVar} from "./utils/getEnvVar.js";
@@ -9,6 +10,8 @@ import {notFoundHandler} from "./middlewares/notFoundHandler.js";
 import {errorHandler} from "./middlewares/errorHandler.js";
 import {requestIdMiddleware} from "./middlewares/requestIdMiddleware.js";
 import cookieParser from 'cookie-parser';
+import {UPLOAD_FILES_DIR_PATH} from "./constants/path.js";
+import {swaggerDocs} from "./middlewares/swaggerDocs.js";
 
 const PORT = Number(getEnvVar(ENV_VARS.PORT, 3000));
 
@@ -24,6 +27,9 @@ export const setupServer = () => {
             limit: '100kb',
         }),
     );
+
+    app.use('/uploads', express.static(UPLOAD_FILES_DIR_PATH));
+    app.use('/api-docs', swaggerDocs());
 
     app.use(indexRouter);
 

@@ -1,4 +1,4 @@
-import {model, Schema, Types} from 'mongoose';
+import {model, Schema} from 'mongoose';
 import {CONTACT_TYPE} from "../../constants/contactType.js";
 import {User} from "./user.js";
 
@@ -29,6 +29,11 @@ const contactSchema = new Schema({
             ref: User,
             // required: true,
         },
+        photo: {
+            type: String,
+            required: false,
+            default: null,
+        }
     },
     {
         timestamps: true,
